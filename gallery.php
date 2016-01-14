@@ -4,7 +4,9 @@
     $username = "root";
     $password = "root";
     $dbname = "tagImages";
-    
+    $imageCategories=[];   
+    $imageArray=array();
+    $imagesIds=[];
     // Create connection
     $conn = new mysqli($servername, $username, $password, $dbname);
 
@@ -12,6 +14,23 @@
     if ($conn->connect_error) {
         die("Connection failed: " . $conn->connect_error);
     }
+    
+    
+    $retrieveCategories = "SELECT * from categories";
+    $categoriesResult = $conn->query($retrieveCategories);
+   
+    if ($categoriesResult->num_rows > 0) {
+        
+        $numberOfRows = $categoriesResult->num_rows;
+        for($i=0; $i<$numberOfRows; $i++){
+            $crow = $categoriesResult->fetch_assoc();
+            $imageCategories[$i] = $crow["name"];
+        }
+    }else {
+        echo "0 results";
+    }
+
+    
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -66,36 +85,124 @@
     </nav>
     <div class="jumbotron" style="background:transparent"><div class="container"></div></div>
     <div class="container">
-      <!-- Example row of columns -->
-      
-        <?php 
-            for ($x = 1; $x <= 4; $x++) {
-        ?>
-        <div class="row">
-            <div class="col-md-3">
-                <img src="images/image<?php echo $x?>.jpg" class="img-responsive" alt="Responsive image">
-            </div>
-            <div class="col-md-9">
-            <?php
-                $imageName = 'image'.$x;
-                $sql = "SELECT tag FROM tags WHERE image = '$imageName'";
-                $result = $conn->query($sql);
-                
-                if ($result->num_rows > 0) {
-                // output data of each row
-                while($row = $result->fetch_assoc()) {
-                    echo "#".$row["tag"]." ";
-                }
-            } else {
-                echo "0 results";
-            }
+      <!-- Image Categories -->
+        <div>
+            <?php 
+                for ($category = 0; $category < count($imageCategories); $category++) {
+                    $retrieveImages = "SELECT * from images WHERE category='$imageCategories[$category]'";
+                     $result = $conn->query($retrieveImages);
+                    
+                    if ($result->num_rows > 0) {
+                        $num_rows = $result->num_rows;
+                        $imagesIds=[];
+                        $imageArray = array();
+                        for($i=0;$i<$num_rows;$i++){
+                            $row = $result->fetch_assoc();
+                            $imagesIds[$i] = $row["id"];
+                            $imageArray[$row["id"]] = $row["name"];
+                        }
+                        
+                    } else {
+                        echo "0 results";
+                    }
+                    $numberOfImages = count($imagesIds);
+                    $numberOfRows = round($numberOfImages/3);
+                    
             ?>
+            <div class="panel panel-info">
+                <div class="panel-heading" data-toggle="collapse" data-target="#panel<?php echo $category?>"><?php echo $imageCategories[$category]?></div>
+                <div class="panel-body collapse" id="panel<?php echo $category?>">
+                    <!--List images-->
+                <?php 
+                    
+                    
+                    for ($row = 0; $row < $numberOfRows; $row++){
+                 ?> 
+                    <div class="row">
+                        <!--First column-->
+                        <?php
+                            if ($row*3<$numberOfImages){
+                        ?>
+                        <div class="col-md-2">
+                            <img src="resources/<?php echo $imageCategories[$category]?>/<?php echo $imageArray[$imagesIds[$row*3]]?>" class="img-responsive" alt="Responsive image">
+                        </div>
+                        <div class="col-md-2">
+                        <?php
+                            $imageName = $imageArray[$imagesIds[$x]];
+                            $sql = "SELECT tag FROM tags WHERE image = '$imageName'";
+                            $result = $conn->query($sql);
+
+                            if ($result->num_rows > 0) {
+                            // output data of each row
+                            while($row = $result->fetch_assoc()) {
+                                echo "#".$row["tag"]." ";
+                            }
+                        } else {
+                            echo "0 results";
+                        }
+                        ?>
+                        </div>
+                        <?php }?>
+                        <!--Second column-->
+                        <?php
+                            if ($row*3+1<$numberOfImages){
+                        ?>
+                        <div class="col-md-2">
+                            <img src="resources/<?php echo $imageCategories[$category]?>/<?php echo $imageArray[$imagesIds[$row*3+1]]?>" class="img-responsive" alt="Responsive image">
+                        </div>
+                        <div class="col-md-2">
+                        <?php
+                            $imageName = $imageArray[$imagesIds[$row*3+1]];
+                            $sql = "SELECT tag FROM tags WHERE image = '$imageName'";
+                            $result = $conn->query($sql);
+
+                            if ($result->num_rows > 0) {
+                            // output data of each row
+                            while($row = $result->fetch_assoc()) {
+                                echo "#".$row["tag"]." ";
+                            }
+                        } else {
+                            echo "0 results";
+                        }
+                        ?>
+                        </div>
+                        <?php }?>
+                        <!--Third column-->
+                        <?php
+                            if ($row*3+2<$numberOfImages){
+                        ?>
+                        <div class="col-md-2">
+                            <img src="resources/<?php echo $imageCategories[$category]?>/<?php echo $imageArray[$imagesIds[$row*3+2]]?>" class="img-responsive" alt="Responsive image">
+                        </div>
+                        <div class="col-md-2">
+                        <?php
+                            $imageName = $imageArray[$imagesIds[$row*3+2]];
+                            $sql = "SELECT tag FROM tags WHERE image = '$imageName'";
+                            $result = $conn->query($sql);
+
+                            if ($result->num_rows > 0) {
+                            // output data of each row
+                            while($row = $result->fetch_assoc()) {
+                                echo "#".$row["tag"]." ";
+                            }
+                        } else {
+                            echo "0 results";
+                        }
+                        ?>
+                        </div>
+                        <?php }?>
+                    </div>
+                        <hr/>
+                <?php }?>
+                   
             </div>
+            <!--End of panel body-->
         </div>
-        <hr/>
-        <?php
-            } 
-        ?>
+            <?php 
+               }
+            ?>
+        <!--End of categories-->
+        
         
       </div>
 <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
@@ -106,3 +213,6 @@
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
 </body>
 </html>
+<?php
+    $conn->close();
+?>

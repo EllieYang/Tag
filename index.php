@@ -5,7 +5,8 @@
     $password = "root";
     $dbname = "tagImages";
     $iniNumber=1;
-    
+    $imageArray=array();
+    $imagesIds=[];
     // Create connection
     $conn = new mysqli($servername, $username, $password, $dbname);
 
@@ -13,6 +14,26 @@
     if ($conn->connect_error) {
         die("Connection failed: " . $conn->connect_error);
     }
+    
+    $retrieveImages = "SELECT * from images";
+    $result = $conn->query($retrieveImages);
+
+    if ($result->num_rows > 0) {
+        $num_rows = $result->num_rows;
+        for($i=0;$i<$num_rows;$i++){
+            $row = $result->fetch_assoc();
+            $imagesIds[$i] = $row["id"];
+            $imageArray[$row["id"]] = $row["name"];
+        }
+        shuffle($imagesIds);
+//        for($i=0;$i<count($imagesIds);$i++){
+//            $id = $imagesIds[$i];
+//            //echo $imageArray[$id];
+//        }
+    } else {
+        echo "0 results";
+    }
+    
     
     $tagContent = $_POST["tag"];
     $image = $_POST["image"];
@@ -96,8 +117,8 @@
             
         </div>
         <div class="col-md-6">
-          <img src="images/image<?php $number = rand(1,4); echo $number?>.jpg" class="img-responsive" alt="Responsive image">
-            <input type="text" name="image" value="image<?php echo $number?>" style="display:none"/>
+          <img src="resources/all/<?php $id = $imagesIds[0]; echo $imageArray[$id]; ?>" class="img-responsive" alt="Responsive image">
+            <input type="text" name="image" value="<?php echo $imageArray[$imagesIds[0]] ?>" style="display:none"/>
        </div>
     </form>
       </div>

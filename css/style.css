@@ -2,3 +2,9 @@
 .formCustomize{
     margin-bottom: 30px;
 }
+#selectedFile{
+    width: 80%;
+}
+.panel-heading{
+    cursor: pointer;
+}
